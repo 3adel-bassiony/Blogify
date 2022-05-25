@@ -31,7 +31,10 @@ Route.group(() => {
         Route.get('/', 'CategoriesController.index').as('listCategories')
 
         // GET - Category: Get category by slug
-        Route.get('/:slug', 'CategoriesController.show').as('sh0wCategory')
+        Route.get('/:slug', 'CategoriesController.show').as('showCategory')
+
+        // GET - Category: Get category posts by slug
+        Route.get('/:id/posts', 'CategoriesController.indexCategoryPosts').as('listCategoryPosts')
 
         // POST - Category: Create new category
         Route.post('/', 'CategoriesController.create').as('createCategory')
@@ -42,4 +45,22 @@ Route.group(() => {
         // DELETE Category: Delete a specific category by id
         Route.delete('/:id', 'CategoriesController.delete').as('deleteCategory')
     }).prefix('/categories')
+
+    // Posts
+    Route.group(() => {
+        // GET - Categories: List all categories
+        Route.get('/', 'PostsController.index').as('listPosts')
+
+        // GET - Category: Get category by slug
+        Route.get('/:slug', 'PostsController.show').as('showPost')
+
+        // POST - Category: Create new category
+        Route.post('/', 'PostsController.create').as('createPost')
+
+        // POST - Category: Create new category
+        Route.put('/:id', 'PostsController.update').as('updatePost')
+
+        // DELETE Category: Delete a specific category by id
+        Route.delete('/:id', 'PostsController.delete').as('deletepost')
+    }).prefix('/posts')
 }).prefix('/api')

@@ -1,5 +1,6 @@
 import Category from 'App/Models/Category'
 import Factory from '@ioc:Adonis/Lucid/Factory'
+import PostFactory from 'Database/factories/PostFactory'
 
 export default Factory.define(Category, ({ faker }) => {
     return {
@@ -8,4 +9,6 @@ export default Factory.define(Category, ({ faker }) => {
         description: faker.lorem.paragraph(4),
         thumbnail: faker.image.imageUrl(1920, 1080),
     }
-}).build()
+})
+    .relation('posts', () => PostFactory)
+    .build()

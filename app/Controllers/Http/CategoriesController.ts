@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Category from 'App/Models/Category'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
+import Post from 'App/Models/Post'
 
 export default class CategoriesController {
     // List all categories
@@ -12,6 +13,14 @@ export default class CategoriesController {
             ctx.request.qs().per_page ?? 5
         )
         return categories
+    }
+
+    public async indexCategoryPosts(ctx: HttpContextContract) {
+        const posts = await Post.query()
+            .where('category_id', ctx.request.params().id)
+            .preload('category')
+            .paginate(ctx.request.qs().page ?? 1, ctx.request.qs().per_page ?? 5)
+        return posts
     }
 
     // Find catgeory by slug
