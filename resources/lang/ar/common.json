@@ -1,0 +1,6 @@
+{
+    "Category_Not_Found": "الفئة غير موجودة",
+    "Category_Deleted_Successfully": "الفئة: تم حذف {id} بنجاح!",
+    "Post_Not_Found": "لم يتم العثور على المنشور",
+    "Post_Deleted_Successfully": "المنشور: {id} تم حذفه بنجاح!"
+}

@@ -54,6 +54,7 @@
     },
     "dependencies": {
         "@adonisjs/core": "^5.8.0",
+        "@adonisjs/i18n": "^1.5.6",
         "@adonisjs/lucid": "^18.0.0",
         "@adonisjs/repl": "^3.1.0",
         "@adonisjs/session": "^6.2.0",

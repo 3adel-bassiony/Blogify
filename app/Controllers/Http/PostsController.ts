@@ -7,28 +7,29 @@ import Category from 'App/Models/Category'
 
 export default class PostsController {
     // List all posts
-    public async index(ctx: HttpContextContract) {
+    public async index({ request }: HttpContextContract) {
         const posts = await Post.query()
             .preload('category')
-            .paginate(ctx.request.qs().page ?? 1, ctx.request.qs().per_page ?? 5)
+            .paginate(request.qs().page ?? 1, request.qs().per_page ?? 5)
         return posts
     }
 
     // Find post by slug
-    public async show({ params, response }: HttpContextContract) {
+    public async show({ response, params, i18n }: HttpContextContract) {
         const post = await Post.query().where('slug', params.slug).preload('category').first
         if (post) {
             return post
         } else {
-            return response.status(404).send({ error: 'Post not found!' })
+            return response.status(404).send({ error: i18n.formatMessage('common.Post_Not_Found') })
         }
     }
 
     // Create new category
-    public async create(ctx: HttpContextContract) {
-        const category = await Category.find(ctx.request.input('category_id'))
+    public async create({ request, response, i18n }: HttpContextContract) {
+        const category = await Category.find(request.input('category_id'))
 
-        if (!category) return ctx.response.badRequest({ error: 'category_id not found!' })
+        if (!category)
+            return response.badRequest({ error: i18n.formatMessage('common.Category_Not_Found') })
 
         const categorySchema = schema.create({
             slug: schema.string({}, [rules.unique({ table: 'posts', column: 'slug' })]),
@@ -40,7 +41,7 @@ export default class PostsController {
         })
 
         try {
-            await ctx.request.validate({
+            await request.validate({
                 schema: categorySchema,
                 messages: {
                     'required': 'The {{ field }} is required to create a new post',
@@ -49,27 +50,28 @@ export default class PostsController {
             })
 
             const post = await Post.create({
-                slug: ctx.request.input('slug'),
-                title: ctx.request.input('title'),
-                content: ctx.request.input('content'),
-                seoDescription: ctx.request.input('seo_description'),
-                seoKeywords: ctx.request.input('seo_keywords'),
-                thumbnail: ctx.request.input('thumbnail'),
+                slug: request.input('slug'),
+                title: request.input('title'),
+                content: request.input('content'),
+                seoDescription: request.input('seo_description'),
+                seoKeywords: request.input('seo_keywords'),
+                thumbnail: request.input('thumbnail'),
             })
 
             await post.related('category').associate(category)
 
             return post
         } catch (error) {
-            return ctx.response.badRequest(error.messages)
+            return response.badRequest(error.messages)
         }
     }
 
     // Update existing post
-    public async update(ctx: HttpContextContract) {
-        const category = await Category.find(ctx.request.input('category_id'))
+    public async update({ request, response, params, i18n }: HttpContextContract) {
+        const category = await Category.find(request.input('category_id'))
 
-        if (!category) return ctx.response.badRequest({ error: 'category_id not found!' })
+        if (!category)
+            return response.badRequest({ error: i18n.formatMessage('common.Category_Not_Found') })
 
         const postSchema = schema.create({
             slug: schema.string({}, [rules.unique({ table: 'posts', column: 'slug' })]),
@@ -81,42 +83,46 @@ export default class PostsController {
         })
 
         try {
-            const post = await Post.find(ctx.params.id)
+            const post = await Post.find(params.id)
 
-            if (!post) return ctx.response.status(404).send({ error: 'Post not found!' })
+            if (!post) return response.status(404).send({ error: 'Post not found!' })
 
-            await ctx.request.validate({
+            await request.validate({
                 schema: postSchema,
                 messages: {
                     'required': 'The {{ field }} is required to create a new post',
                     'slug.unique': 'The slug should be a unique string',
                 },
             })
-            post.categoryId = ctx.request.input('category_id')
-            post.slug = ctx.request.input('slug')
-            post.title = ctx.request.input('title')
-            post.content = ctx.request.input('content')
-            post.thumbnail = ctx.request.input('thumbnail')
-            post.seoDescription = ctx.request.input('description')
-            post.seoDescription = ctx.request.input('description')
+            post.categoryId = request.input('category_id')
+            post.slug = request.input('slug')
+            post.title = request.input('title')
+            post.content = request.input('content')
+            post.thumbnail = request.input('thumbnail')
+            post.seoDescription = request.input('description')
+            post.seoDescription = request.input('description')
             post.updatedAt = DateTime.now()
 
             await post.save()
 
             return post
         } catch (error) {
-            ctx.response.badRequest(error.messages)
+            response.badRequest(error.messages)
         }
     }
 
     // Delete existing post
-    public async delete(ctx: HttpContextContract) {
-        const post = await Post.find(ctx.params.id)
+    public async delete({ response, params, i18n }: HttpContextContract) {
+        const post = await Post.find(params.id)
         if (post) {
             await post.delete()
-            return ctx.response.status(200).send({ message: 'Post Deleted successfully!' })
+            return response.status(200).send({
+                message: i18n.formatMessage('common.Post_Deleted_Successfully', {
+                    id: params.id,
+                }),
+            })
         } else {
-            return ctx.response.status(404).send({ error: 'Post not found!' })
+            return response.status(404).send({ error: i18n.formatMessage('common.Post_Not_Found') })
         }
     }
 }

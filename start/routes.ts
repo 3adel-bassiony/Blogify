@@ -63,4 +63,6 @@ Route.group(() => {
         // DELETE Category: Delete a specific category by id
         Route.delete('/:id', 'PostsController.delete').as('deletepost')
     }).prefix('/posts')
-}).prefix('/api')
+})
+    .prefix('/api')
+    .middleware('detectUserLocale')
