@@ -63,6 +63,18 @@ Route.group(() => {
         // DELETE Category: Delete a specific category by id
         Route.delete('/:id', 'PostsController.delete').as('deletepost')
     }).prefix('/posts')
+
+    // Auth
+    Route.group(() => {
+        Route.post('/login', 'AuthController.login').as('login')
+        Route.post('/register', 'AuthController.register').as('register')
+        Route.post('/logout', 'AuthController.logout').as('logout')
+        Route.post('/forgot-password', 'AuthController.forgotPassword').as('forgotPassword')
+        Route.post('/reset-password/:token', 'AuthController.resetPassword').as('resetPassword')
+        Route.post('/change-password', 'AuthController.changePassword').as('changePassword')
+        Route.get('/verify/:token', 'AuthController.verifyEmail').as('verify')
+        Route.post('/refresh-token', 'AuthController.refreshToken').as('refreshToken')
+    }).prefix('auth')
 })
     .prefix('/api')
     .middleware('detectUserLocale')
