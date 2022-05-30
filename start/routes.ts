@@ -37,13 +37,13 @@ Route.group(() => {
         Route.get('/:id/posts', 'CategoriesController.indexCategoryPosts').as('listCategoryPosts')
 
         // POST - Category: Create new category
-        Route.post('/', 'CategoriesController.create').as('createCategory')
+        Route.post('/', 'CategoriesController.create').middleware('auth').as('createCategory')
 
         // POST - Category: Create new category
-        Route.put('/:id', 'CategoriesController.update').as('updateCategory')
+        Route.put('/:id', 'CategoriesController.update').middleware('auth').as('updateCategory')
 
         // DELETE Category: Delete a specific category by id
-        Route.delete('/:id', 'CategoriesController.delete').as('deleteCategory')
+        Route.delete('/:id', 'CategoriesController.delete').middleware('auth').as('deleteCategory')
     }).prefix('/categories')
 
     // Posts

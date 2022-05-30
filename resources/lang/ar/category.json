@@ -1,0 +1,6 @@
+{
+    "Category_Not_Found": "الفئة غير موجودة",
+    "Category_Deleted_Successfully": "الفئة: تم حذف {id} بنجاح!",
+    "User_Cant_Edit_Category": "لا يمكنك تحرير هذه الفئة",
+    "User_Cant_Delete_Category": "لا يمكنك حذف هذه الفئة"
+}
