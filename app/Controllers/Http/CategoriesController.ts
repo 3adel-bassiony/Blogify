@@ -25,7 +25,7 @@ export default class CategoriesController {
 
     // Find catgeory by slug
     public async show({ response, params, i18n }: HttpContextContract) {
-        const category = await Category.findBy('slug', params.slug)
+        const category = await Category.query().where('slug', params.slug).preload('user')
         if (category) {
             return category
         } else {

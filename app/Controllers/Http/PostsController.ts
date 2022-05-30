@@ -16,7 +16,11 @@ export default class PostsController {
 
     // Find post by slug
     public async show({ response, params, i18n }: HttpContextContract) {
-        const post = await Post.query().where('slug', params.slug).preload('category').first
+        const post = await Post.query()
+            .where('slug', params.slug)
+            .preload('category')
+            .preload('user')
+
         if (post) {
             return post
         } else {

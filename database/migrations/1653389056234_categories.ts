@@ -10,10 +10,7 @@ export default class extends BaseSchema {
             table.string('title')
             table.text('description')
             table.string('thumbnail')
-
-            /**
-             * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
-             */
+            table.integer('user_id').unsigned().references('users.id').onDelete('CASCADE')
             table.timestamp('created_at', { useTz: true })
             table.timestamp('updated_at', { useTz: true })
         })

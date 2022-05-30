@@ -1,13 +1,11 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
 import Category from './Category'
+import User from './User'
 
 export default class Post extends BaseModel {
     @column({ isPrimary: true })
     public id: number
-
-    @column()
-    public categoryId: number
 
     @column()
     public slug: string
@@ -27,6 +25,12 @@ export default class Post extends BaseModel {
     @column()
     public seoKeywords: string
 
+    @column()
+    public categoryId: number
+
+    @column()
+    public userId: number
+
     @column.dateTime({ autoCreate: true })
     public createdAt: DateTime
 
@@ -35,4 +39,7 @@ export default class Post extends BaseModel {
 
     @belongsTo(() => Category)
     public category: BelongsTo<typeof Category>
+
+    @belongsTo(() => User)
+    public user: BelongsTo<typeof User>
 }
