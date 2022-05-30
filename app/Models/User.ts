@@ -4,7 +4,7 @@ import { column, beforeSave, BaseModel, hasMany, HasMany } from '@ioc:Adonis/Luc
 import Category from './Category'
 import Post from './Post'
 
-export default class User extends BaseModel {
+class User extends BaseModel {
     @column({ isPrimary: true })
     public id: number
 
@@ -51,3 +51,11 @@ export default class User extends BaseModel {
         }
     }
 }
+
+User['findForAuth'] = async function (uid: string[], uidValue: string) {
+    return this.query()
+        .where((query) => uid.map((uid) => query.orWhere(uid, 'ILIKE', uidValue)))
+        .firstOrFail()
+}
+
+export default User

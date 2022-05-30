@@ -8,13 +8,18 @@ import { DateTime } from 'luxon'
 
 export default class AuthController {
     public async login({ auth, request, response, i18n }: HttpContextContract) {
-        const email = request.input('email')
+        const uid = request.input('uid')
         const password = request.input('password')
 
-        const user = await User.query().where('email', email).firstOrFail()
+        const user = await User.query().where('email', uid).orWhere('username', uid).first()
+
+        if (!user)
+            return response.badRequest({
+                error: i18n.formatMessage('auth.Email_Or_Username_Not_Exist'),
+            })
 
         try {
-            const token = await auth.use('api').attempt(email, password, {
+            const token = await auth.use('api').attempt(uid, password, {
                 expiresIn: '7days',
                 name: 'Access Token',
             })
@@ -36,18 +41,22 @@ export default class AuthController {
 
     public async register({ request, response, auth }: HttpContextContract) {
         const name = request.input('name')
-        const username = request.input('username')
-        const email = request.input('email')
+        const username = request.input('username').toLowerCase()
+        const email = request.input('email').toLowerCase()
         const phone = request.input('phone')
         const password = request.input('password')
         const avatar = request.input('avatar')
 
         const userSchema = schema.create({
             name: schema.string(),
-            username: schema.string({}, [rules.unique({ table: 'users', column: 'username' })]),
-            email: schema.string({}, [rules.unique({ table: 'users', column: 'email' })]),
+            username: schema.string({}, [
+                rules.unique({ table: 'users', column: 'username', caseInsensitive: true }),
+            ]),
+            email: schema.string({}, [
+                rules.unique({ table: 'users', column: 'email', caseInsensitive: true }),
+            ]),
             phone: schema.string({}, [rules.unique({ table: 'users', column: 'phone' })]),
-            password: schema.string(),
+            password: schema.string({}, [rules.minLength(8)]),
         })
 
         try {
