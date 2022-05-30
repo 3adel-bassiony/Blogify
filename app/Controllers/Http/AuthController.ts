@@ -2,9 +2,8 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Mail from '@ioc:Adonis/Addons/Mail'
 import Hash from '@ioc:Adonis/Core/Hash'
+import Route from '@ioc:Adonis/Core/Route'
 import User from 'App/Models/User'
-import ApiToken from 'App/Models/ApiToken'
-import { DateTime } from 'luxon'
 
 export default class AuthController {
     public async login({ auth, request, response, i18n }: HttpContextContract) {
@@ -32,7 +31,7 @@ export default class AuthController {
                 is_verified: user.isVerified,
                 created_at: user.createdAt,
                 updated_at: user.updatedAt,
-                token: token.tokenHash,
+                token: token.toJSON(),
             }
         } catch {
             return response.badRequest({ error: i18n.formatMessage('auth.Invalid_Credentials') })
@@ -84,20 +83,22 @@ export default class AuthController {
                 name: 'Access Token',
             })
 
-            const verificationToken = await auth.use('api').generate(user, {
+            const signedUrl = await Route.makeSignedUrl('verifyEmail', {
+                email,
                 expiresIn: '60m',
-                name: 'Email Verification',
             })
 
-            await Mail.sendLater((message) => {
-                message
-                    .from('info@example.com')
-                    .to(email)
-                    .subject('Verify Your Email')
-                    .htmlView('emails/welcome', {
-                        url: `${process.env.APP_URL}/api/auth/verify/${verificationToken.tokenHash}`,
-                    })
-            })
+            console.log(signedUrl)
+
+            // await Mail.sendLater((message) => {
+            //     message
+            //         .from('info@example.com')
+            //         .to(email)
+            //         .subject('Verify Your Email')
+            //         .htmlView('emails/welcome', {
+            //             url: `${process.env.APP_URL}${signedUrl}`,
+            //         })
+            // })
 
             // Return user object
             return {
@@ -109,7 +110,7 @@ export default class AuthController {
                 is_verified: false,
                 created_at: user.createdAt,
                 updated_at: user.updatedAt,
-                token: token.tokenHash,
+                token: token.toJSON(),
             }
         } catch (error) {
             response.badRequest(error.messages)
@@ -130,9 +131,7 @@ export default class AuthController {
 
         if (!user) return response.badRequest({ error: i18n.formatMessage('auth.Email_Not_Exist') })
 
-        const token = await auth.use('api').generate(user, {
-            expiresIn: '30m',
-        })
+        const signedUrl = await Route.makeSignedUrl('resetPassword', { email, expiresIn: '60m' })
 
         await Mail.sendLater((message) => {
             message
@@ -140,7 +139,7 @@ export default class AuthController {
                 .to(email)
                 .subject('Reset Password')
                 .htmlView('emails/reset_password', {
-                    url: `${process.env.APP_URL}api/auth/reset-password/${token.tokenHash}`,
+                    url: `${process.env.APP_URL}${signedUrl}`,
                 })
         })
 
@@ -150,24 +149,20 @@ export default class AuthController {
     }
 
     public async resetPassword({ request, response, params, i18n }: HttpContextContract) {
-        const token = await ApiToken.query()
-            .where('token', params.token)
-            .where('expires_at', '>', DateTime.local().toSQL())
-            .first()
+        if (request.hasValidSignature()) {
+            const user = await User.findBy('email', params.email)
 
-        if (!token) return response.notFound({ error: i18n.formatMessage('auth.Invalid_Token') })
+            if (!user)
+                return response.notFound({ error: i18n.formatMessage('auth.Email_Not_Exist') })
 
-        const user = await User.find(token.userId)
+            user.password = request.input('new_password')
+            user.save()
+            return response
+                .status(200)
+                .send({ message: i18n.formatMessage('auth.Password_Changed_Successfully') })
+        }
 
-        if (!user) return response.notFound({ error: i18n.formatMessage('auth.Email_Not_Exist') })
-
-        user.password = request.input('new_password')
-        user.save()
-        token.delete()
-
-        return response
-            .status(200)
-            .send({ message: i18n.formatMessage('auth.Password_Changed_Successfully') })
+        return response.notFound({ error: i18n.formatMessage('auth.Invalid_Signature') })
     }
 
     public async changePassword({ request, response, i18n }: HttpContextContract) {
@@ -194,41 +189,19 @@ export default class AuthController {
         }
     }
 
-    public async verifyEmail({ response, params, i18n }) {
-        const token = await ApiToken.query()
-            .where('token', params.token)
-            .where('expires_at', '>', DateTime.local().toSQL())
-            .first()
+    public async verifyEmail({ request, response, params, i18n }) {
+        if (request.hasValidSignature()) {
+            const user = await User.findBy('email', params.email)
 
-        if (!token) return response.notFound({ error: i18n.formatMessage('auth.Invalid_Token') })
+            if (!user)
+                return response.notFound({ error: i18n.formatMessage('auth.Email_Not_Exist') })
 
-        const user = await User.find(token.userId)
+            user.isVerified = true
+            user.save()
 
-        if (!user) return response.notFound({ error: i18n.formatMessage('auth.Email_Not_Exist') })
+            return response.status(200).send({ message: i18n.formatMessage('auth.Email_Verified') })
+        }
 
-        user.isVerified = true
-        user.save()
-        token.delete()
-
-        return response.status(200).send({ message: i18n.formatMessage('auth.Email_Verified') })
-    }
-
-    public async refreshToken({ request, response, auth, i18n }: HttpContextContract) {
-        const token = await ApiToken.query().where('token', request.input('token')).first()
-
-        if (!token) return response.notFound({ error: i18n.formatMessage('auth.Invalid_Token') })
-
-        const user = await User.find(token.userId)
-
-        if (!user) return response.notFound({ error: i18n.formatMessage('auth.Email_Not_Exist') })
-
-        const newToken = await auth.use('api').generate(user, {
-            expiresIn: '7days',
-            name: 'Access Token',
-        })
-
-        token.delete()
-
-        return response.status(200).send({ token: newToken.tokenHash })
+        return response.notFound({ error: i18n.formatMessage('auth.Invalid_Signature') })
     }
 }
