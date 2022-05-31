@@ -6,12 +6,12 @@ import PostFactory from 'Database/factories/PostFactory'
 export default Factory.define(User, ({ faker }) => {
     return {
         name: faker.name.findName(),
-        username: faker.internet.userName(),
-        email: faker.internet.email(),
+        username: faker.internet.userName().toLocaleLowerCase(),
+        email: faker.internet.email().toLocaleLowerCase(),
         phone: faker.phone.phoneNumber(),
-        password: 'admin1020',
+        password: 'user1020',
         avatar: faker.internet.avatar(),
-        isVerified: false,
+        isVerified: true,
     }
 })
     .relation('categories', () => CategoryFactory)
