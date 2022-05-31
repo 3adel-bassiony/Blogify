@@ -55,13 +55,13 @@ Route.group(() => {
         Route.get('/:slug', 'PostsController.show').as('showPost')
 
         // POST - Category: Create new category
-        Route.post('/', 'PostsController.create').as('createPost')
+        Route.post('/', 'PostsController.create').middleware('auth').as('createPost')
 
         // POST - Category: Create new category
-        Route.put('/:id', 'PostsController.update').as('updatePost')
+        Route.put('/:id', 'PostsController.update').middleware('auth').as('updatePost')
 
         // DELETE Category: Delete a specific category by id
-        Route.delete('/:id', 'PostsController.delete').as('deletepost')
+        Route.delete('/:id', 'PostsController.delete').middleware('auth').as('deletepost')
     }).prefix('/posts')
 
     // Auth
