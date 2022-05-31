@@ -61,6 +61,24 @@ Route.group(() => {
         Route.delete('/:id', 'PostsController.delete').middleware('auth').as('deletepost')
     }).prefix('/posts')
 
+    // Comments
+    Route.group(() => {
+        // GET - List all comments
+        Route.get('/', 'CommentsController.index').as('listComments')
+
+        // GET - Get Comment by id
+        Route.get('/:id', 'CommentsController.show').as('showComment')
+
+        // POST - Create new comment
+        Route.post('/', 'CommentsController.create').middleware('auth').as('createComment')
+
+        // Put - Update existing comment
+        Route.put('/:id', 'CommentsController.update').middleware('auth').as('updateComment')
+
+        // DELETE - Delete a specific comment
+        Route.delete('/:id', 'CommentsController.delete').middleware('auth').as('deleteComment')
+    }).prefix('/comments')
+
     // Auth
     Route.group(() => {
         Route.post('/login', 'AuthController.login').as('login')

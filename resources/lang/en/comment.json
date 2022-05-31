@@ -1,0 +1,6 @@
+{
+    "Comment_Not_Found": "Comment not found",
+    "Comment_Deleted_Successfully": "Comment {id} deleted successfully!",
+    "User_Cant_Edit_Comment": "You can't edit this comment",
+    "User_Cant_Delete_Comment": "You can't delete this comment"
+}
