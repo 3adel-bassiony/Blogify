@@ -9,6 +9,13 @@ export default class PostsController {
     // List all posts
     public async index({ request }: HttpContextContract) {
         const posts = await Post.query()
+            .if(request.qs().category_id, (query) => {
+                query.where('category_id', request.qs().category_id)
+            })
+            .if(request.qs().user_id, (query) => {
+                query.where('user_id', request.qs().user_id)
+            })
+            .orderBy('created_at', request.qs().order_by ?? 'desc')
             .preload('category')
             .paginate(request.qs().page ?? 1, request.qs().per_page ?? 5)
         return posts
@@ -20,12 +27,11 @@ export default class PostsController {
             .where('slug', params.slug)
             .preload('category')
             .preload('user')
+            .first()
 
-        if (post) {
-            return post
-        } else {
-            return response.status(404).send({ error: i18n.formatMessage('common.Post_Not_Found') })
-        }
+        if (!post) return response.notFound({ error: i18n.formatMessage('common.Post_Not_Found') })
+
+        return post
     }
 
     // Create new category

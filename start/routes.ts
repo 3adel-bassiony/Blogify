@@ -33,9 +33,6 @@ Route.group(() => {
         // GET - Category: Get category by slug
         Route.get('/:slug', 'CategoriesController.show').as('showCategory')
 
-        // GET - Category: Get category posts by slug
-        Route.get('/:id/posts', 'CategoriesController.indexCategoryPosts').as('listCategoryPosts')
-
         // POST - Category: Create new category
         Route.post('/', 'CategoriesController.create').middleware('auth').as('createCategory')
 
@@ -48,19 +45,19 @@ Route.group(() => {
 
     // Posts
     Route.group(() => {
-        // GET - Categories: List all categories
+        // GET - List all posts
         Route.get('/', 'PostsController.index').as('listPosts')
 
-        // GET - Category: Get category by slug
+        // GET - Get Post by slug
         Route.get('/:slug', 'PostsController.show').as('showPost')
 
-        // POST - Category: Create new category
+        // POST - Create new post
         Route.post('/', 'PostsController.create').middleware('auth').as('createPost')
 
-        // POST - Category: Create new category
+        // Put - Update existing post
         Route.put('/:id', 'PostsController.update').middleware('auth').as('updatePost')
 
-        // DELETE Category: Delete a specific category by id
+        // DELETE - Delete a specific post
         Route.delete('/:id', 'PostsController.delete').middleware('auth').as('deletepost')
     }).prefix('/posts')
 

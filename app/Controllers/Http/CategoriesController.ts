@@ -3,42 +3,30 @@ import { DateTime } from 'luxon'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Category from 'App/Models/Category'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
-import Post from 'App/Models/Post'
 
 export default class CategoriesController {
     // List all categories
-    public async index(ctx: HttpContextContract) {
-        const categories = await Category.query().paginate(
-            ctx.request.qs().page ?? 1,
-            ctx.request.qs().per_page ?? 5
-        )
+    public async index({ request }: HttpContextContract) {
+        const categories = await Category.query()
+            .if(request.qs().user_id, (query) => {
+                query.where('user_id', request.qs().user_id)
+            })
+            .paginate(request.qs().page ?? 1, request.qs().per_page ?? 5)
         return categories
-    }
-
-    public async indexCategoryPosts(ctx: HttpContextContract) {
-        const posts = await Post.query()
-            .where('category_id', ctx.request.params().id)
-            .preload('category')
-            .paginate(ctx.request.qs().page ?? 1, ctx.request.qs().per_page ?? 5)
-        return posts
     }
 
     // Find catgeory by slug
     public async show({ response, params, i18n }: HttpContextContract) {
-        const category = await Category.query().where('slug', params.slug).preload('user')
-        if (category) {
-            return category
-        } else {
-            return response.status(404).send({
-                error: i18n.formatMessage('category.Category_Not_Found'),
-            })
-        }
+        const category = await Category.query().where('slug', params.slug).preload('user').first()
+        if (!category)
+            return response
+                .status(404)
+                .send({ error: i18n.formatMessage('category.Category_Not_Found') })
+        return category
     }
 
     // Create new category
     public async create({ request, response, auth }: HttpContextContract) {
-        const user = await auth.user
-
         const categorySchema = schema.create({
             slug: schema.string({}, [rules.unique({ table: 'categories', column: 'slug' })]),
             title: schema.string(),
@@ -60,7 +48,7 @@ export default class CategoriesController {
                 title: request.input('title'),
                 description: request.input('description'),
                 thumbnail: request.input('thumbnail'),
-                userId: user.id,
+                userId: auth.user?.id,
             })
 
             return category
@@ -71,13 +59,12 @@ export default class CategoriesController {
 
     // Update existing category
     public async update({ request, response, params, auth, i18n }: HttpContextContract) {
-        const user = await auth.user
         const category = await Category.find(params.id)
 
         if (!category)
             return response.notFound({ error: i18n.formatMessage('category.Category_Not_Found') })
 
-        if (user.id !== category.userId)
+        if (auth.user?.id !== category.userId)
             return response.badRequest({
                 error: i18n.formatMessage('category.User_Cant_Edit_Category'),
             })
@@ -114,13 +101,12 @@ export default class CategoriesController {
 
     // Delete existing category
     public async delete({ response, params, auth, i18n }: HttpContextContract) {
-        const user = await auth.user
         const category = await Category.find(params.id)
 
         if (!category)
             return response.notFound({ error: i18n.formatMessage('category.Category_Not_Found') })
 
-        if (user.id !== category.userId)
+        if (auth.user?.id !== category.userId)
             return response.badRequest({
                 error: i18n.formatMessage('category.User_Cant_Delete_Category'),
             })
