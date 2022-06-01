@@ -1,6 +1,16 @@
 import { DateTime } from 'luxon'
 import Hash from '@ioc:Adonis/Core/Hash'
-import { column, beforeSave, BaseModel, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
+
+import {
+    column,
+    beforeSave,
+    BaseModel,
+    beforeFind,
+    beforeFetch,
+    hasMany,
+    HasMany,
+    ModelQueryBuilderContract,
+} from '@ioc:Adonis/Lucid/Orm'
 import Category from './Category'
 import Post from './Post'
 import Comment from './Comment'
@@ -28,16 +38,19 @@ class User extends BaseModel {
     public rememberMeToken?: string
 
     @column()
-    public isVerified: boolean
+    public avatar: string
 
     @column()
-    public avatar: string
+    public isVerified: boolean
 
     @column.dateTime({ autoCreate: true })
     public createdAt: DateTime
 
     @column.dateTime({ autoCreate: true, autoUpdate: true })
     public updatedAt: DateTime
+
+    @column.dateTime({ serializeAs: null })
+    public deletedAt: DateTime
 
     @hasMany(() => Category)
     public categories: HasMany<typeof Category>
@@ -47,6 +60,12 @@ class User extends BaseModel {
 
     @hasMany(() => Comment)
     public comments: HasMany<typeof Comment>
+
+    @beforeFind()
+    @beforeFetch()
+    public static softDeletesFind = (query: ModelQueryBuilderContract<typeof BaseModel>) => {
+        query.whereNull('deleted_at')
+    }
 
     @beforeSave()
     public static async hashPassword(user: User) {

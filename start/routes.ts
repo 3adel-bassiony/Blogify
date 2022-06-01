@@ -89,6 +89,15 @@ Route.group(() => {
         Route.post('/change-password', 'AuthController.changePassword').as('changePassword')
         Route.get('/verify/:email', 'AuthController.verifyEmail').as('verifyEmail')
     }).prefix('auth')
+
+    Route.group(() => {
+        Route.get('/', 'ProfilesController.show')
+        Route.put('/', 'ProfilesController.edit')
+        Route.patch('/', 'ProfilesController.update')
+        Route.delete('/', 'ProfilesController.delete')
+    })
+        .prefix('profile')
+        .middleware('auth')
 })
     .prefix('/api')
     .middleware('detectUserLocale')
