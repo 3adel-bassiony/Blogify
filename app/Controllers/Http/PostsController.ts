@@ -124,15 +124,15 @@ export default class PostsController {
     // Delete existing post
     public async delete({ response, params, i18n }: HttpContextContract) {
         const post = await Post.find(params.id)
-        if (post) {
-            await post.delete()
-            return response.status(200).send({
-                message: i18n.formatMessage('common.Post_Deleted_Successfully', {
-                    id: params.id,
-                }),
-            })
-        } else {
+
+        if (!post)
             return response.status(404).send({ error: i18n.formatMessage('common.Post_Not_Found') })
-        }
+
+        await post.merge({ deletedAt: DateTime.now() }).save()
+        return response.status(200).send({
+            message: i18n.formatMessage('common.Post_Deleted_Successfully', {
+                id: params.id,
+            }),
+        })
     }
 }

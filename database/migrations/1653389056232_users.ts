@@ -16,7 +16,7 @@ export default class UsersSchema extends BaseSchema {
             table.boolean('is_verified').nullable()
             table.timestamp('created_at', { useTz: true }).notNullable()
             table.timestamp('updated_at', { useTz: true }).notNullable()
-            table.dateTime('deleted_at').defaultTo(null)
+            table.timestamp('deleted_at').defaultTo(null)
         })
     }
 

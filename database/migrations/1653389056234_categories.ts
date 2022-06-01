@@ -13,6 +13,7 @@ export default class extends BaseSchema {
             table.integer('user_id').unsigned().references('users.id').onDelete('CASCADE')
             table.timestamp('created_at', { useTz: true })
             table.timestamp('updated_at', { useTz: true })
+            table.timestamp('deleted_at').defaultTo(null)
         })
     }
 

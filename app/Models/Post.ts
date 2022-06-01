@@ -1,5 +1,15 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, BelongsTo, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
+import {
+    BaseModel,
+    column,
+    belongsTo,
+    BelongsTo,
+    hasMany,
+    HasMany,
+    beforeFind,
+    beforeFetch,
+    ModelQueryBuilderContract,
+} from '@ioc:Adonis/Lucid/Orm'
 import Category from './Category'
 import User from './User'
 import Comment from './Comment'
@@ -38,6 +48,9 @@ export default class Post extends BaseModel {
     @column.dateTime({ autoCreate: true, autoUpdate: true })
     public updatedAt: DateTime
 
+    @column.dateTime({ serializeAs: null })
+    public deletedAt: DateTime
+
     @belongsTo(() => Category)
     public category: BelongsTo<typeof Category>
 
@@ -46,4 +59,10 @@ export default class Post extends BaseModel {
 
     @hasMany(() => Comment)
     public comments: HasMany<typeof Comment>
+
+    @beforeFind()
+    @beforeFetch()
+    public static softDeletesFind = (query: ModelQueryBuilderContract<typeof BaseModel>) => {
+        query.whereNull('deleted_at')
+    }
 }

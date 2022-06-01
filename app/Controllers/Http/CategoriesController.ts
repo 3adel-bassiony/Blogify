@@ -111,7 +111,7 @@ export default class CategoriesController {
                 error: i18n.formatMessage('category.User_Cant_Delete_Category'),
             })
 
-        await category.delete()
+        await category.merge({ deletedAt: DateTime.now() }).save()
 
         return response.status(200).send({
             message: i18n.formatMessage('category.Category_Deleted_Successfully', {

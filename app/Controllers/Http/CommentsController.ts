@@ -110,7 +110,7 @@ export default class CommentsController {
                 error: i18n.formatMessage('comment.User_Cant_Delete_Comment'),
             })
 
-        await comment.delete()
+        await comment.merge({ deletedAt: DateTime.now() }).save()
 
         return response.status(200).send({
             message: i18n.formatMessage('comment.Comment_Deleted_Successfully', {

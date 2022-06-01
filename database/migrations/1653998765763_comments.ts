@@ -11,6 +11,7 @@ export default class extends BaseSchema {
             table.integer('post_id').unsigned().references('posts.id').onDelete('CASCADE')
             table.timestamp('created_at', { useTz: true })
             table.timestamp('updated_at', { useTz: true })
+            table.timestamp('deleted_at').defaultTo(null)
         })
     }
 
