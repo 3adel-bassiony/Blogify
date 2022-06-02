@@ -48,6 +48,9 @@ export default class Post extends BaseModel {
     @column.dateTime({ autoCreate: true, autoUpdate: true })
     public updatedAt: DateTime
 
+    @column.dateTime({ autoCreate: true })
+    public publishedAt: DateTime
+
     @column.dateTime({ serializeAs: null })
     public deletedAt: DateTime
 
@@ -63,6 +66,6 @@ export default class Post extends BaseModel {
     @beforeFind()
     @beforeFetch()
     public static softDeletesFind = (query: ModelQueryBuilderContract<typeof BaseModel>) => {
-        query.whereNull('deleted_at')
+        query.whereNull('deleted_at').andWhere('published_at', '<=', DateTime.local().toSQL())
     }
 }

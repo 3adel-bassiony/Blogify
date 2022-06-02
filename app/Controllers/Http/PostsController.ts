@@ -48,6 +48,7 @@ export default class PostsController {
             seo_description: schema.string(),
             seo_keywords: schema.string(),
             thumbnail: schema.string(),
+            published_at: schema.date.optional(),
         })
 
         try {
@@ -66,6 +67,7 @@ export default class PostsController {
                 seoDescription: request.input('seo_description'),
                 seoKeywords: request.input('seo_keywords'),
                 thumbnail: request.input('thumbnail'),
+                publishedAt: request.input('published_at') ?? DateTime.now(),
             })
 
             await post.related('category').associate(category)
@@ -90,6 +92,7 @@ export default class PostsController {
             seo_description: schema.string(),
             seo_keywords: schema.string(),
             thumbnail: schema.string(),
+            published_at: schema.date.optional(),
         })
 
         try {
@@ -112,7 +115,7 @@ export default class PostsController {
             post.seoDescription = request.input('description')
             post.seoDescription = request.input('description')
             post.updatedAt = DateTime.now()
-
+            post.publishedAt = request.input('published_at') ?? DateTime.now()
             await post.save()
 
             return post

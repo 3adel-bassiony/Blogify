@@ -14,6 +14,7 @@ export default class extends BaseSchema {
             table.string('seo_keywords')
             table.integer('user_id').unsigned().references('users.id').onDelete('CASCADE')
             table.integer('category_id').unsigned().references('categories.id').onDelete('CASCADE')
+            table.timestamp('published_at', { useTz: true })
             table.timestamp('created_at', { useTz: true })
             table.timestamp('updated_at', { useTz: true })
             table.timestamp('deleted_at').defaultTo(null)
