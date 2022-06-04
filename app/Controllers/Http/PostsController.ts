@@ -15,6 +15,11 @@ export default class PostsController {
             .if(request.qs().user_id, (query) => {
                 query.where('user_id', request.qs().user_id)
             })
+            .if(request.qs().search, (query) => {
+                query.whereRaw('slug @@ :term OR title @@ :term OR content @@ :term', {
+                    term: '%' + request.qs().search + '%',
+                })
+            })
             .orderBy('created_at', request.qs().order_by ?? 'desc')
             .preload('category')
             .paginate(request.qs().page ?? 1, request.qs().per_page ?? 5)

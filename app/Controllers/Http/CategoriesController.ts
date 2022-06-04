@@ -11,6 +11,11 @@ export default class CategoriesController {
             .if(request.qs().user_id, (query) => {
                 query.where('user_id', request.qs().user_id)
             })
+            .if(request.qs().search, (query) => {
+                query.whereRaw('slug @@ :term OR title @@ :term OR description @@ :term', {
+                    term: '%' + request.qs().search + '%',
+                })
+            })
             .paginate(request.qs().page ?? 1, request.qs().per_page ?? 5)
         return categories
     }
