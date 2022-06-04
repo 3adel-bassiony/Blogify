@@ -34,14 +34,15 @@ export default class PostsController {
         return post
     }
 
-    // Create new category
-    public async create({ request, response, i18n }: HttpContextContract) {
+    // Create new post
+    public async create({ request, response, auth, i18n }: HttpContextContract) {
         const category = await Category.find(request.input('category_id'))
 
         if (!category)
             return response.badRequest({ error: i18n.formatMessage('common.Category_Not_Found') })
 
-        const categorySchema = schema.create({
+        const postSchema = schema.create({
+            category_id: schema.number([rules.exists({ table: 'categories', column: 'id' })]),
             slug: schema.string({}, [rules.unique({ table: 'posts', column: 'slug' })]),
             title: schema.string(),
             content: schema.string(),
@@ -53,7 +54,7 @@ export default class PostsController {
 
         try {
             await request.validate({
-                schema: categorySchema,
+                schema: postSchema,
                 messages: {
                     'required': 'The {{ field }} is required to create a new post',
                     'slug.unique': 'The slug should be a unique string',
@@ -71,6 +72,7 @@ export default class PostsController {
             })
 
             await post.related('category').associate(category)
+            await post.related('user').associate(auth.user!)
 
             return post
         } catch (error) {
@@ -79,44 +81,42 @@ export default class PostsController {
     }
 
     // Update existing post
-    public async update({ request, response, params, i18n }: HttpContextContract) {
-        const category = await Category.find(request.input('category_id'))
+    public async update({ request, response, params, auth, i18n }: HttpContextContract) {
+        const post = await Post.query().where('id', params.id).first()
+        if (!post) return response.status(404).send({ error: 'Post not found!' })
 
+        if (auth.user?.id !== post.userId)
+            return response.badRequest({
+                error: i18n.formatMessage('comment.User_Cant_Delete_Post'),
+            })
+
+        const category = await Category.find(post.categoryId)
         if (!category)
             return response.badRequest({ error: i18n.formatMessage('common.Category_Not_Found') })
 
         const postSchema = schema.create({
-            slug: schema.string({}, [rules.unique({ table: 'posts', column: 'slug' })]),
-            title: schema.string(),
-            content: schema.string(),
-            seo_description: schema.string(),
-            seo_keywords: schema.string(),
-            thumbnail: schema.string(),
+            category_id: schema.number.optional([
+                rules.exists({ table: 'categories', column: 'id' }),
+            ]),
+            slug: schema.string.optional({}, [rules.unique({ table: 'posts', column: 'slug' })]),
+            title: schema.string.optional({}, [rules.minLength(4)]),
+            content: schema.string.optional({}, [rules.minLength(4)]),
+            seo_description: schema.string.optional(),
+            seo_keywords: schema.string.optional(),
+            thumbnail: schema.string.optional(),
             published_at: schema.date.optional(),
         })
 
         try {
-            const post = await Post.find(params.id)
-
-            if (!post) return response.status(404).send({ error: 'Post not found!' })
-
-            await request.validate({
+            const payload = await request.validate({
                 schema: postSchema,
                 messages: {
                     'required': 'The {{ field }} is required to create a new post',
                     'slug.unique': 'The slug should be a unique string',
                 },
             })
-            post.categoryId = request.input('category_id')
-            post.slug = request.input('slug')
-            post.title = request.input('title')
-            post.content = request.input('content')
-            post.thumbnail = request.input('thumbnail')
-            post.seoDescription = request.input('description')
-            post.seoDescription = request.input('description')
-            post.updatedAt = DateTime.now()
-            post.publishedAt = request.input('published_at') ?? DateTime.now()
-            await post.save()
+
+            post.merge(payload).save()
 
             return post
         } catch (error) {
@@ -125,11 +125,14 @@ export default class PostsController {
     }
 
     // Delete existing post
-    public async delete({ response, params, i18n }: HttpContextContract) {
+    public async delete({ response, params, auth, i18n }: HttpContextContract) {
         const post = await Post.find(params.id)
+        if (!post) return response.status(404).send({ error: 'Post not found!' })
 
-        if (!post)
-            return response.status(404).send({ error: i18n.formatMessage('common.Post_Not_Found') })
+        if (auth.user?.id !== post.userId)
+            return response.badRequest({
+                error: i18n.formatMessage('comment.User_Cant_Delete_Post'),
+            })
 
         await post.merge({ deletedAt: DateTime.now() }).save()
         return response.status(200).send({

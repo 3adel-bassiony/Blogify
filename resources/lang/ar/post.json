@@ -1,0 +1,6 @@
+{
+    "Category_Not_Found": "المنشور غير موجودة",
+    "Category_Deleted_Successfully": "المنشور تم حذف {id} بنجاح!",
+    "User_Cant_Edit_Category": "لا يمكنك تحرير هذا المنشور",
+    "User_Cant_Delete_Category": "لا يمكنك حذف هذه المنشور"
+}

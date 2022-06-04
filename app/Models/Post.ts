@@ -9,6 +9,7 @@ import {
     beforeFind,
     beforeFetch,
     ModelQueryBuilderContract,
+    beforePaginate,
 } from '@ioc:Adonis/Lucid/Orm'
 import Category from './Category'
 import User from './User'
@@ -63,9 +64,18 @@ export default class Post extends BaseModel {
     @hasMany(() => Comment)
     public comments: HasMany<typeof Comment>
 
-    @beforeFind()
+    // @beforeFind()
     @beforeFetch()
-    public static softDeletesFind = (query: ModelQueryBuilderContract<typeof BaseModel>) => {
+    public static withoutSoftDeletes = (query: ModelQueryBuilderContract<typeof Post>) => {
         query.whereNull('deleted_at').andWhere('published_at', '<=', DateTime.local().toSQL())
+    }
+
+    @beforePaginate()
+    public static updatePagination([countQuery, query]: [
+        ModelQueryBuilderContract<typeof Post>,
+        ModelQueryBuilderContract<typeof Post>
+    ]) {
+        query.whereNull('deleted_at').andWhere('published_at', '<=', DateTime.local().toSQL())
+        countQuery.whereNull('deleted_at').andWhere('published_at', '<=', DateTime.local().toSQL())
     }
 }

@@ -1,0 +1,6 @@
+{
+    "Post_Not_Found": "Post not found",
+    "Post_Deleted_Successfully": "Post {id} deleted successfully!",
+    "User_Cant_Edit_Post": "You can't edit this post",
+    "User_Cant_Delete_Post": "You can't delete this post"
+}

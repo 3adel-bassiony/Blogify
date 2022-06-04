@@ -23,6 +23,7 @@ export default class AuthController {
                 name: 'Access Token',
             })
             return {
+                id: user.id,
                 name: user.name,
                 username: user.username,
                 email: user.email,
