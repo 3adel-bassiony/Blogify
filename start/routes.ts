@@ -90,6 +90,7 @@ Route.group(() => {
         Route.get('/verify/:email', 'AuthController.verifyEmail').as('verifyEmail')
     }).prefix('auth')
 
+    /// Profile
     Route.group(() => {
         Route.get('/', 'ProfilesController.show')
         Route.put('/', 'ProfilesController.edit')
@@ -97,6 +98,24 @@ Route.group(() => {
         Route.delete('/', 'ProfilesController.delete')
     })
         .prefix('profile')
+        .middleware('auth')
+
+    /// Likes
+    Route.group(() => {
+        Route.get('/', 'LikesController.index')
+        Route.post('/', 'LikesController.create')
+        Route.delete('/', 'LikesController.delete')
+    })
+        .prefix('likes')
+        .middleware('auth')
+
+    /// Bookmarks
+    Route.group(() => {
+        Route.get('/', 'BookmarksController.index')
+        Route.post('/', 'BookmarksController.create')
+        Route.delete('/', 'BookmarksController.delete')
+    })
+        .prefix('bookmarks')
         .middleware('auth')
 })
     .prefix('/api')
