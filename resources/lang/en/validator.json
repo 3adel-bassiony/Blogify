@@ -1,0 +1,7 @@
+{
+    "shared": {
+        "required": "The value for the field is required",
+        "unique": "Email is already in use",
+        "minLength": "The field must have { minLength } items"
+    }
+}

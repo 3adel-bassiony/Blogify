@@ -1,0 +1,6 @@
+{
+    "Comment_Not_Found": "التعليق غير موجود",
+    "Comment_Deleted_Successfully": "التعليق تم حذف {id} بنجاح!",
+    "User_Cant_Edit_Comment": "لا يمكنك تعديل هذا التعليق",
+    "User_Cant_Delete_Comment": "لا يمكنك حذف هذا التعليق"
+}

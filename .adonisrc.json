@@ -3,7 +3,9 @@
     "commands": [
         "./commands",
         "@adonisjs/core/build/commands/index.js",
-        "@adonisjs/repl/build/commands"
+        "@adonisjs/repl/build/commands",
+        "@adonisjs/lucid/build/commands",
+        "@adonisjs/mail/build/commands"
     ],
     "exceptionHandlerNamespace": "App/Exceptions/Handler",
     "aliases": {
@@ -12,13 +14,20 @@
         "Database": "database",
         "Contracts": "contracts"
     },
-    "preloads": ["./start/routes", "./start/kernel"],
+    "preloads": [
+        "./start/routes",
+        "./start/kernel"
+    ],
     "providers": [
         "./providers/AppProvider",
         "@adonisjs/core",
         "@adonisjs/session",
         "@adonisjs/view",
-        "@adonisjs/shield"
+        "@adonisjs/shield",
+        "@adonisjs/lucid",
+        "@adonisjs/i18n",
+        "@adonisjs/auth",
+        "@adonisjs/mail"
     ],
     "metaFiles": [
         {
@@ -28,17 +37,24 @@
         {
             "pattern": "resources/views/**/*.edge",
             "reloadServer": false
-        }
+        },
+        "resources/lang/**/*.(json|yaml)"
     ],
-    "aceProviders": ["@adonisjs/repl"],
+    "aceProviders": [
+        "@adonisjs/repl"
+    ],
     "tests": {
         "suites": [
             {
                 "name": "functional",
-                "files": ["tests/functional/**/*.spec(.ts|.js)"],
+                "files": [
+                    "tests/functional/**/*.spec(.ts|.js)"
+                ],
                 "timeout": 60000
             }
         ]
     },
-    "testProviders": ["@japa/preset-adonis/TestsProvider"]
+    "testProviders": [
+        "@japa/preset-adonis/TestsProvider"
+    ]
 }

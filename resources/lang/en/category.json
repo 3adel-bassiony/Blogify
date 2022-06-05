@@ -1,0 +1,6 @@
+{
+    "Category_Not_Found": "Category not found",
+    "Category_Deleted_Successfully": "Category: {id} deleted successfully!",
+    "User_Cant_Edit_Category": "You can't edit this category",
+    "User_Cant_Delete_Category": "You can't delete this category"
+}
