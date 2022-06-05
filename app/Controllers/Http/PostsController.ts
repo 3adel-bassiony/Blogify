@@ -1,4 +1,6 @@
 import { DateTime } from 'luxon'
+import Event from '@ioc:Adonis/Core/Event'
+import Database from '@ioc:Adonis/Lucid/Database'
 
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Post from 'App/Models/Post'
@@ -20,23 +22,73 @@ export default class PostsController {
                     term: '%' + request.qs().search + '%',
                 })
             })
+            .withCount('likes', (query) => {
+                query.whereNull('deleted_at')
+            })
+            .withCount('comments', (query) => {
+                query.whereNull('deleted_at')
+            })
+            .withCount('bookmarks', (query) => {
+                query.whereNull('deleted_at')
+            })
             .orderBy('created_at', request.qs().order_by ?? 'desc')
             .preload('category')
+            .debug(true)
             .paginate(request.qs().page ?? 1, request.qs().per_page ?? 5)
-        return posts
+
+        Event.on('db:query', Database.prettyPrint)
+
+        return {
+            meta: posts.getMeta(),
+            data: posts.all().map((post) => ({
+                id: post.id,
+                title: post.title,
+                slug: post.slug,
+                content: post.content,
+                thumbnail: post.thumbnail,
+                created_at: post.createdAt,
+                updated_at: post.updatedAt,
+                published_at: post.publishedAt,
+                seo_description: post.seoDescription,
+                seo_keywords: post.seoKeywords,
+                likes_count: Number(post.$extras.likes_count),
+                bookmarks_count: Number(post.$extras.bookmarks_count),
+                comments_count: Number(post.$extras.comments_count),
+                category: post.category,
+            })),
+        }
     }
 
     // Find post by slug
     public async show({ response, params, i18n }: HttpContextContract) {
         const post = await Post.query()
             .where('slug', params.slug)
+            .withCount('likes')
+            .withCount('comments')
+            .withCount('bookmarks')
             .preload('category')
             .preload('user')
             .first()
 
         if (!post) return response.notFound({ error: i18n.formatMessage('common.Post_Not_Found') })
 
-        return post
+        return {
+            id: post.id,
+            title: post.title,
+            slug: post.slug,
+            content: post.content,
+            thumbnail: post.thumbnail,
+            created_at: post.createdAt,
+            updated_at: post.updatedAt,
+            published_at: post.publishedAt,
+            seo_description: post.seoDescription,
+            seo_keywords: post.seoKeywords,
+            likes_count: Number(post.$extras.likes_count),
+            bookmarks_count: Number(post.$extras.bookmarks_count),
+            comments_count: Number(post.$extras.comments_count),
+            category: post.category,
+            user: post.user,
+        }
     }
 
     // Create new post

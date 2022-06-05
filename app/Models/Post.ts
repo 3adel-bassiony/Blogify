@@ -6,7 +6,6 @@ import {
     BelongsTo,
     hasMany,
     HasMany,
-    beforeFind,
     beforeFetch,
     ModelQueryBuilderContract,
     beforePaginate,
@@ -14,6 +13,8 @@ import {
 import Category from './Category'
 import User from './User'
 import Comment from './Comment'
+import Like from './Like'
+import Bookmark from './Bookmark'
 
 export default class Post extends BaseModel {
     @column({ isPrimary: true })
@@ -63,6 +64,12 @@ export default class Post extends BaseModel {
 
     @hasMany(() => Comment)
     public comments: HasMany<typeof Comment>
+
+    @hasMany(() => Like)
+    public likes: HasMany<typeof Like>
+
+    @hasMany(() => Bookmark)
+    public bookmarks: HasMany<typeof Bookmark>
 
     // @beforeFind()
     @beforeFetch()

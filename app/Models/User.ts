@@ -14,6 +14,8 @@ import {
 import Category from './Category'
 import Post from './Post'
 import Comment from './Comment'
+import Like from './Like'
+import Bookmark from './Bookmark'
 
 class User extends BaseModel {
     @column({ isPrimary: true })
@@ -60,6 +62,12 @@ class User extends BaseModel {
 
     @hasMany(() => Comment)
     public comments: HasMany<typeof Comment>
+
+    @hasMany(() => Like)
+    public likes: HasMany<typeof Like>
+
+    @hasMany(() => Bookmark)
+    public bookmarks: HasMany<typeof Bookmark>
 
     @beforeFind()
     @beforeFetch()
