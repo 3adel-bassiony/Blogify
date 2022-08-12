@@ -125,7 +125,7 @@ export default class AuthController {
         }
     }
 
-    public async forgotPassword({ request, response, auth, i18n }: HttpContextContract) {
+    public async forgotPassword({ request, response, i18n }: HttpContextContract) {
         const email = request.input('email')
 
         const user = await User.query().where('email', email).firstOrFail()
